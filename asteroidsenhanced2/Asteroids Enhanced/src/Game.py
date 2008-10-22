@@ -21,6 +21,7 @@
 import sys, os
 import math, random
 
+
 import pygame
 from pygame.locals import *
 
@@ -49,7 +50,12 @@ class Game:
         self.nuke = 1
         self.ShockWaves = 2
         self.Shield = 5
-        self.BackGround = pygame.image.load('./data/bg1.png').convert()
+        self.BG1 = pygame.image.load('./data/bg1.png').convert()
+        self.BG2 = pygame.image.load('./data/bg2.png').convert()
+        self.BackGround = self.BG1
+        self.bgID = 1
+        self.levelstart = 0
+        self.DeathMessage = 0
 
         Ship.containers = self.sprites
         Shot.containers = self.sprites, self.shots, self.clearables
@@ -94,7 +100,7 @@ class Game:
                     play_boom()
                     self.score += 75*a.scale
             for p in self.aoe:
-                if PointCollision(a, p.pos):
+                if Collision(a.drawpoints, p.points):
                     a.hit()
                     p.kill()
                     self.score += 75*a.scale
@@ -106,6 +112,7 @@ class Game:
                     play_boom()
                     self.lives -= 1
                     self.__clearSprites()
+                    self.DeathMessage = 1
                 elif self.ship.alive() and self.Shield > 0:
                     a.kill()
                     self.Shield -= 1
@@ -121,6 +128,7 @@ class Game:
                     self.lives -= 1
                     self.__clearSprites()
                     self.Shield = 3
+                    self.DeathMessage = 1
                 elif self.ship.alive() and self.Shield > 0:
                     self.Shield -= 1
                     play_boom()
@@ -158,6 +166,7 @@ class Game:
         if self.lives <= 0 and not self.particles:
             render_text(self.screen, "Game Over!", self.font2, (320, 225), True)
             render_text(self.screen, "Press Escape to Exit", self.font3, (320, 270), True)
+        self.__renderMessages()
         pygame.display.flip()
 
     def __gameInput(self):
@@ -179,7 +188,21 @@ class Game:
                     self.paused = True
                 elif e.state == 6 and e.gain == 1:
                     self.paused = False
-
+                    
+                    
+    def __renderMessages(self):
+        if self.levelstart > 0 and self.levelstart < 150 and self.DeathMessage == 0:
+            self.levelstart += 1
+            render_text(self.screen,"Level: "+str(self.level),self.font3,(320,240),True)
+            if self.levelstart == 150:
+                self.levelstart = 0
+        if self.DeathMessage > 0 and self.DeathMessage < 100:
+            self.DeathMessage += 1
+            render_text(self.screen,"You Died!",self.font3,(320,240),True)
+            if self.DeathMessage == 100:
+                self.DeathMessage = 0
+                                    
+            
     def __playerInput(self):
         for e in self.events:
             if e.type == KEYDOWN:
@@ -194,7 +217,7 @@ class Game:
                     
                 if e.key == K_b and self.ship.alive() and self.ShockWaves > 0:
                     self.ShockWaves -= 1
-                    for i in range(100):
+                    for i in range(20):
                         Shockwave(self.ship.pos)
                         play_boom()
                     
@@ -227,12 +250,14 @@ class Game:
             s.use_antialias = USE_ANTIALIAS
         if not self.ship.alive() and not self.particles and self.lives > 0:
             self.ship = Ship()
+            self.levelstart = 1
             for i in range(self.level):
                 Asteroid(GeneratePos())
         
         if not self.asteroids and self.ship.alive():
             self.__clearSprites()
             self.level += 1
+            self.levelstart = 1
             self.Missile = (5 + self.level)
             self.ShockWaves += 1
             self.ship.pos = [320, 240]
@@ -241,6 +266,12 @@ class Game:
                 Asteroid(GeneratePos())
             if self.Shield < 5:
                 self.Shield += 1
+            if self.bgID == 1:
+                self.BackGround = self.BG2
+                self.bgID = 2
+            elif self.bgID == 2:
+                self.BackGround = self.BG1
+                self.bgID = 1
 
         if self.score > self.highscore:
             self.highscore = self.score
@@ -266,6 +297,7 @@ class Game:
             self.__collisionDetect()
             self.__updateGame()
             self.__drawScene()
+            
 
     def Run(self):
         self.__mainLoop()
