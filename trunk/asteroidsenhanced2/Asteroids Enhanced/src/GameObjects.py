@@ -363,6 +363,7 @@ class Particle(Sprite):
     def draw(self, surface):
         if self.use_antialias:
             surface.fill((255, self.color, 0), (int(self.pos[0]), int(self.pos[1]), self.size[0], self.size[1]))
+            
         else:
             surface.fill((200, 200, 200), (int(self.pos[0]), int(self.pos[1]), self.size[0], self.size[1]))
 
@@ -372,12 +373,13 @@ class Shockwave(Sprite):
     def __init__(self, pos):
 
         Sprite.__init__(self, self.containers)
-
+        self.points = SHOCK_BOX_POINTS
         self.pos = list(pos)
-        self.size = [1, 1]
+        self.size = [5, 5]
         self.vx = random.choice([-3, -2.75, -2.5, -2.25 -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3])/2
         self.vy = random.choice([-3, -2.75, -2.5, -2.25 -2, -1.75, -1.5, -1.25, -1, -0.75, -0.5, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3])/2
         self.color = 255
+        
 
     def update(self):
 
@@ -400,10 +402,11 @@ class Shockwave(Sprite):
     def draw(self, surface):
         if self.use_antialias:
             surface.fill((0, self.color, 203), (int(self.pos[0]), int(self.pos[1]), self.size[0], self.size[1]))
+            
         else:
             surface.fill((200, 200, 200), (int(self.pos[0]), int(self.pos[1]), self.size[0], self.size[1]))
-
-
+            
+           
 
 class Exhaust(Sprite):
 
